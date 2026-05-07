@@ -1,0 +1,125 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --color-canvas: #0a0b0f;
+  --color-surface-1: #12131a;
+  --color-surface-2: #181924;
+  --color-surface-3: #1e2030;
+  --color-surface-4: #252740;
+  --color-ink: #e8eaf0;
+  --color-ink-muted: #a0a4b8;
+  --color-ink-subtle: #6b7084;
+  --color-ink-tertiary: #4a4e60;
+  --color-hairline: #1e2030;
+  --color-hairline-strong: #2a2d42;
+  --color-hairline-tertiary: #363a52;
+  --color-accent: #6e78ff;
+  --color-accent-hover: #8a92ff;
+  --color-accent-focus: #5a64e8;
+  --color-accent-muted: rgba(110, 120, 255, 0.12);
+  --color-accent-strong: rgba(110, 120, 255, 0.25);
+  --color-warning: #f0a030;
+  --color-warning-muted: rgba(240, 160, 48, 0.15);
+  --color-success: #34d399;
+  --color-success-muted: rgba(52, 211, 153, 0.15);
+  --color-danger: #ef4444;
+  --color-danger-muted: rgba(239, 68, 68, 0.15);
+  --font-sans: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  --border-radius: 12px;
+  --card-shadow: none;
+  --letter-spacing: normal;
+}
+
+body {
+  color: var(--color-ink);
+  background: var(--color-canvas);
+  font-family: var(--font-sans);
+  letter-spacing: var(--letter-spacing);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-surface-1);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-hairline-strong);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-hairline-tertiary);
+}
+
+* {
+  border-color: var(--color-hairline);
+}
+
+input, textarea, select {
+  background: var(--color-surface-1);
+  color: var(--color-ink);
+  border-color: var(--color-hairline);
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--color-ink-tertiary);
+}
+
+[data-theme="vercel"] body {
+  color: var(--color-ink);
+  background: var(--color-canvas);
+}
+
+[data-theme="vercel"] ::-webkit-scrollbar-track {
+  background: var(--color-surface-2);
+}
+
+[data-theme="vercel"] ::-webkit-scrollbar-thumb {
+  background: var(--color-hairline-strong);
+}
+
+/* ── Theme-specific header styles ────────────────────────────── */
+
+[data-theme="spacex"] main h1,
+[data-theme="spacex"] main h2 {
+  text-transform: uppercase;
+  letter-spacing: 0.96px;
+}
+
+[data-theme="vercel"] main h1 {
+  letter-spacing: -0.02em;
+}
+
+/* ── Theme-specific input overrides ──────────────────────────── */
+
+[data-theme="spacex"] input,
+[data-theme="spacex"] textarea,
+[data-theme="spacex"] select {
+  border-radius: 0;
+}
+
+[data-theme="spacex"] input:focus,
+[data-theme="spacex"] textarea:focus,
+[data-theme="spacex"] select:focus {
+  box-shadow: none;
+}
+
+/* ── Theme-specific scrollbar: Supabase ──────────────────────── */
+
+[data-theme="supabase"] ::-webkit-scrollbar-track {
+  background: var(--color-surface-1);
+}
+
+[data-theme="supabase"] ::-webkit-scrollbar-thumb {
+  background: var(--color-hairline-strong);
+  border-radius: 3px;
+}
