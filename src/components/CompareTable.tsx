@@ -1,8 +1,8 @@
 "use client";
 
 import clsx from "clsx";
-
-type LocationStatus = "recommended" | "watch" | "not_recommended" | "unknown";
+import { getRiskTags, type LocationStatus } from "@/lib/constants";
+import { StatusBadge } from "@/components/ui/StatusBadge";
 
 interface Location {
   id: string;
@@ -24,47 +24,6 @@ interface Location {
 
 interface CompareTableProps {
   locations: Location[];
-}
-
-const statusConfig: Record<
-  LocationStatus,
-  { label: string; color: string; bg: string }
-> = {
-  recommended: {
-    label: "推荐",
-    color: "text-success",
-    bg: "bg-success-muted",
-  },
-  watch: {
-    label: "观望",
-    color: "text-warning",
-    bg: "bg-warning-muted",
-  },
-  not_recommended: {
-    label: "不推荐",
-    color: "text-danger",
-    bg: "bg-danger-muted",
-  },
-  unknown: {
-    label: "未知",
-    color: "text-ink-subtle",
-    bg: "bg-surface-2",
-  },
-};
-
-function getRiskTags(loc: Location): string[] {
-  const risks: string[] = [];
-  if (loc.bortle >= 5) risks.push("光害严重");
-  else if (loc.bortle >= 3) risks.push("光害中等");
-  if (loc.cloudCover >= 50) risks.push("多云");
-  else if (loc.cloudCover >= 30) risks.push("有云");
-  if (loc.precipitation >= 30) risks.push("降水风险");
-  else if (loc.precipitation >= 10) risks.push("少量降水");
-  if (loc.moonPhase !== "新月") risks.push("月光干扰");
-  const distNum = parseInt(loc.distance);
-  if (distNum >= 300) risks.push("路途遥远");
-  if (loc.bestHour === "N/A") risks.push("无观测窗口");
-  return risks;
 }
 
 function bestScore(locations: Location[]): number {
@@ -89,22 +48,6 @@ function parseDistance(d: string): number {
 
 function bestDistance(locations: Location[]): number {
   return Math.min(...locations.map((l) => parseDistance(l.distance)));
-}
-
-function StatusBadge({ status }: { status: Location["status"] }) {
-  const cfg =
-    statusConfig[status as LocationStatus] ?? statusConfig.unknown;
-  return (
-    <span
-      className={clsx(
-        "inline-flex items-center px-2 py-0.5 rounded text-[11px] font-medium tracking-wide",
-        cfg.bg,
-        cfg.color
-      )}
-    >
-      {cfg.label}
-    </span>
-  );
 }
 
 function RiskTag({ label }: { label: string }) {

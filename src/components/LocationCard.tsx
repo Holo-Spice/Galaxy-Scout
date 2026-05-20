@@ -1,31 +1,11 @@
 import { type locations } from "@/lib/mock-data";
+import { STATUS_CONFIG, type LocationStatus } from "@/lib/constants";
 
 type Location = (typeof locations)[number];
 
 interface LocationCardProps {
   location: Location;
 }
-
-const statusConfig = {
-  recommended: {
-    label: "推荐",
-    color: "text-success",
-    bg: "bg-success-muted",
-    dot: "bg-success",
-  },
-  watch: {
-    label: "观望",
-    color: "text-warning",
-    bg: "bg-warning-muted",
-    dot: "bg-warning",
-  },
-  not_recommended: {
-    label: "不推荐",
-    color: "text-danger",
-    bg: "bg-danger-muted",
-    dot: "bg-danger",
-  },
-} as const;
 
 function ScoreBar({ score }: { score: number }) {
   const width = `${score}%`;
@@ -77,7 +57,7 @@ function MetricItem({
 }
 
 export function LocationCard({ location }: LocationCardProps) {
-  const status = statusConfig[location.status as keyof typeof statusConfig];
+  const status = STATUS_CONFIG[location.status as LocationStatus];
 
   return (
     <article className="group bg-surface-1 rounded-xl border border-hairline hover:border-hairline-strong transition-colors duration-150 overflow-hidden data-[theme=spacex]:border-0 data-[theme=spacex]:bg-transparent data-[theme=spacex]:hover:bg-white/[0.02] data-[theme=vercel]:shadow-[0_0_0_1px_var(--color-hairline)] data-[theme=vercel]:border-0 data-[theme=vercel]:hover:shadow-[0_0_0_1px_var(--color-hairline-strong)] data-[theme=supabase]:border-emerald-500/20 data-[theme=supabase]:hover:border-emerald-500/40">
