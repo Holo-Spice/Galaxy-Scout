@@ -15,7 +15,7 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden md:flex flex-col w-[240px] shrink-0 min-h-screen bg-surface-1 border-r border-hairline data-[theme=spacex]:bg-transparent data-[theme=spacex]:border-r-0 data-[theme=vercel]:shadow-[1px_0_0_var(--color-hairline)] data-[theme=vercel]:border-r-0 data-[theme=supabase]:border-r-emerald-500/30">
+    <aside className="sidebar-base data-[theme=spacex]:sidebar-spacex data-[theme=vercel]:sidebar-vercel data-[theme=supabase]:sidebar-supabase">
       <div className="px-5 py-5">
         <span className="text-[15px] font-semibold text-ink tracking-tight">
           Galaxy Scout
@@ -34,9 +34,8 @@ export function Sidebar() {
               key={href}
               href={href}
               className={`
-                flex items-center gap-3 px-4 py-2 rounded-lg text-[14px] font-medium
-                transition-colors duration-150
-                data-[theme=spacex]:uppercase data-[theme=spacex]:tracking-wider data-[theme=spacex]:text-[12px] data-[theme=spacex]:hover:bg-white/5
+                nav-link-base
+                data-[theme=spacex]:nav-link-spacex
                 ${
                   isActive
                     ? "bg-accent-muted text-accent data-[theme=spacex]:bg-white/10 data-[theme=supabase]:bg-emerald-500/20 data-[theme=supabase]:text-emerald-400"

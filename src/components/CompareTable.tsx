@@ -77,7 +77,7 @@ function CellHighlight({
   return (
     <td
       className={clsx(
-        "px-3 py-2.5 text-center font-mono text-[13px] leading-tight border-r border-hairline last:border-r-0 transition-colors",
+        "table-cell-base",
         isBest ? "bg-accent-muted text-accent data-[theme=supabase]:bg-emerald-500/15 data-[theme=supabase]:text-emerald-400" : "text-ink"
       )}
     >

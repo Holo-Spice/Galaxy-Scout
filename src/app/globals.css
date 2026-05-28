@@ -74,6 +74,19 @@ input::placeholder, textarea::placeholder {
   color: var(--color-ink-tertiary);
 }
 
+/* ── Theme-specific variables: Vercel ───────────────────────── */
+
+[data-theme="vercel"] {
+  --color-ink: #171717;
+  --color-ink-muted: #666;
+  --color-ink-subtle: #888;
+  --color-surface-1: #fff;
+  --color-surface-2: #fafafa;
+  --color-canvas: #f5f5f5;
+  --color-hairline: rgba(0, 0, 0, 0.08);
+  --color-hairline-strong: rgba(0, 0, 0, 0.15);
+}
+
 [data-theme="vercel"] body {
   color: var(--color-ink);
   background: var(--color-canvas);
@@ -113,6 +126,17 @@ input::placeholder, textarea::placeholder {
   box-shadow: none;
 }
 
+/* ── Theme-specific variables: Supabase ─────────────────────── */
+
+[data-theme="supabase"] {
+  --color-ink: #ebebeb;
+  --color-ink-muted: #707070;
+  --color-ink-subtle: #505050;
+  --color-surface-1: #171717;
+  --color-surface-2: #1c1c1c;
+  --color-hairline: #2e2e2e;
+}
+
 /* ── Theme-specific scrollbar: Supabase ──────────────────────── */
 
 [data-theme="supabase"] ::-webkit-scrollbar-track {
@@ -122,4 +146,84 @@ input::placeholder, textarea::placeholder {
 [data-theme="supabase"] ::-webkit-scrollbar-thumb {
   background: var(--color-hairline-strong);
   border-radius: 3px;
+}
+
+/* ── @apply component utilities ─────────────────────────────── */
+
+@layer components {
+  .card-base {
+    @apply bg-surface-1 rounded-xl border border-hairline hover:border-hairline-strong transition-colors duration-150 overflow-hidden;
+  }
+  .card-spacex {
+    @apply border-0 bg-transparent hover:bg-white/[0.02];
+  }
+  .card-vercel {
+    @apply shadow-[0_0_0_1px_var(--color-hairline)] border-0 hover:shadow-[0_0_0_1px_var(--color-hairline-strong)];
+  }
+  .card-supabase {
+    @apply border-emerald-500/20 hover:border-emerald-500/40;
+  }
+
+  .sidebar-base {
+    @apply card-base hidden md:flex flex-col w-[240px] shrink-0 min-h-screen;
+  }
+  .sidebar-spacex {
+    @apply card-spacex border-r-0;
+  }
+  .sidebar-vercel {
+    @apply shadow-[1px_0_0_var(--color-hairline)] border-r-0;
+  }
+  .sidebar-supabase {
+    @apply border-r-emerald-500/30;
+  }
+
+  .nav-link-base {
+    @apply flex items-center gap-3 px-4 py-2 rounded-lg text-[14px] font-medium transition-colors duration-150;
+  }
+  .nav-link-spacex {
+    @apply uppercase tracking-wider text-[12px] hover:bg-white/5;
+  }
+
+  .table-cell-base {
+    @apply px-3 py-2.5 text-center font-mono text-[13px] leading-tight border-r border-hairline last:border-r-0 transition-colors;
+  }
+}
+
+/* ── Premium micro-interactions ─────────────────────────── */
+
+@layer components {
+  .btn-press {
+    @apply transition-transform duration-100 active:scale-[0.97];
+  }
+
+  .link-underline {
+    @apply relative;
+    background-image: linear-gradient(currentColor, currentColor);
+    background-size: 0% 1px;
+    background-position: 0% 100%;
+    background-repeat: no-repeat;
+    transition: background-size 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .link-underline:hover {
+    background-size: 100% 1px;
+  }
+
+  .focus-glow:focus-visible {
+    @apply outline-none ring-2 ring-accent/40 ring-offset-2 ring-offset-surface-1;
+    transition: box-shadow 0.2s ease;
+  }
+}
+
+/* ── Reduced-motion safety net ─────────────────────────────────── */
+/* Catches any CSS animations/transitions not already guarded by JS useReducedMotion() hooks */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

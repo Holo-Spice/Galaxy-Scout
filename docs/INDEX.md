@@ -34,6 +34,7 @@
 | 做多地点对比、推荐分、排序、解释原因 | `05-compare-scoring.md` | `04-data-sources.md`, `07-frontend-ux.md` |
 | 新增或修改后端接口 | `06-api-contracts.md` | `03-data-model.md`, `08-implementation-standards.md` |
 | 做页面、地图、表格、移动端体验 | `07-frontend-ux.md` | `05-compare-scoring.md`, `04-data-sources.md` |
+| 添加或修改动画、3D 背景、过渡效果 | `07-frontend-ux.md` | `02-architecture.md`, `08-implementation-standards.md` |
 | 写测试、修测试、验收功能 | `09-testing-acceptance.md` | 相关功能模块文档 |
 | 规划版本和开发顺序 | `10-roadmap.md` | `01-product-scope.md` |
 

@@ -35,6 +35,30 @@ src/
 - `lib/geo` 放距离、bbox、坐标格式化等纯函数。
 - `lib/time` 统一处理 timezone。
 
+## 组件组织
+
+```text
+src/components/
+  ui/         - 通用 UI 组件 (StatusBadge, LocationHero, StatCardGrid, TagList, AnimatedNumber, TiltCard, AnimatedMain)
+  map/        - 地图相关子组件 (MapMarker, LayerToggle, LocationPanel)
+  (根目录)     - 页面级组件 (DashboardContent, LocationDetailContent 等)
+```
+
+规则：
+
+- 通用组件放 `ui/`，可跨页面复用。
+- 地图相关子组件放 `map/`，与 MapLibre 绑定。
+- 页面级组件直接放 `components/` 根目录，与路由页面一一对应。
+- 组件不直接访问数据库，数据通过 props 或 API 获取。
+
+### 动画规范
+
+- 所有动画组件必须使用 `"use client"` 指令。
+- 必须检查 `prefers-reduced-motion`，使用 `useReducedMotion` hook。
+- 动画变体统一放在 `src/lib/animation.ts`。
+- 禁止在服务端组件中使用 Framer Motion。
+- CSS 级别降级作为兜底：`globals.css` 中的 `@media (prefers-reduced-motion: reduce)`。
+
 ## TypeScript
 
 - 开启 `strict`。
@@ -93,6 +117,12 @@ LIGHT_POLLUTION_SOURCE_DIR=
 - 图片文件名使用随机 key。
 - 默认不公开地点和图片。
 - 日志中避免记录完整精确坐标；必要时降低精度。
+
+## 测试
+
+- 单元测试: `npx vitest run`
+- E2E 测试: `npx playwright test`
+- 测试文件位置: `src/lib/animation.test.ts`
 
 ## 文档同步
 

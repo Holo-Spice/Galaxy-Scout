@@ -4,6 +4,7 @@ import { ThemeProvider } from "@/components/ThemeProvider";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { ThemeBackground } from "@/components/ThemeBackground";
 import { StarfieldWrapper } from "@/components/StarfieldWrapper";
+import { AnimatedMain } from "@/components/AnimatedMain";
 
 export const metadata = {
   title: "Galaxy Scout",
@@ -19,7 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ThemeBackground />
           <div className="relative z-10 flex min-h-screen">
             <Sidebar />
-            <main className="flex-1 p-6 overflow-auto">{children}</main>
+            <AnimatedMain>{children}</AnimatedMain>
           </div>
           <ThemeSwitcher />
         </ThemeProvider>

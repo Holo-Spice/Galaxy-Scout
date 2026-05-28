@@ -11,6 +11,45 @@
 | 多地点对比 | `/compare` | 核心决策页面 |
 | 设置 | `/settings` | 出发点、单位、评分权重、数据源状态 |
 
+## 动画系统
+
+动画库：
+
+- Framer Motion：页面过渡、组件动画。
+- React Three Fiber (R3F)：3D 星空背景。
+
+动画模式：
+
+- 页面过渡：AnimatePresence fade。
+- 卡片交错揭示：stagger reveal。
+- 数字滚动：AnimatedNumber。
+- 3D 倾斜：TiltCard。
+- 3D 星空：R3F starfield。
+
+降级策略：
+
+- JS 层：useReducedMotion hook 检测用户偏好。
+- CSS 层：global override 作为安全网。
+- 动画变体统一定义在 `src/lib/animation.ts`。
+
+## 组件结构
+
+共享组件：
+
+- StatusBadge：状态徽章。
+- LocationHero：英雄横幅。
+- StatCardGrid：统计卡片网格。
+- TagList：标签列表。
+- AnimatedNumber：数字滚动动画。
+- TiltCard：3D 倾斜卡片。
+- AnimatedMain：页面过渡容器。
+
+地图子组件：
+
+- MapMarker：地图标记。
+- LayerToggle：图层开关。
+- LocationPanel：地点面板。
+
 ## 多地点对比 UI
 
 核心信息：

@@ -26,6 +26,8 @@ Browser / PWA
 - 日期时间：Temporal polyfill 或 Luxon，必须保留 IANA timezone。
 - 图片：本地 `uploads/` 或 Supabase Storage。
 - 测试：Vitest + Playwright。
+- 动画：framer-motion（页面过渡、卡片揭示、3D 倾斜、数字滚动）。
+- 3D：@react-three/fiber + @react-three/drei + three（3D 星空背景）。
 
 ## 模块边界
 
@@ -37,6 +39,7 @@ Browser / PWA
 | Light Pollution Service | 栅格点查询、来源元数据、可信度 | 把 VIIRS 当实测 Bortle |
 | Compare Service | 聚合地点、天气、天文、光污染、距离、评分 | 长期保存外部原始响应 |
 | Image Service | 上传、缩略图、封面、图片元数据 | 公开图库和分享 |
+| Animation System | UI 过渡动画、3D 星空粒子背景、prefers-reduced-motion 无障碍降级 | 业务逻辑、数据获取、路由 |
 
 ## 数据流
 
