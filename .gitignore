@@ -34,5 +34,12 @@ Thumbs.db
 *.tsbuildinfo
 next-env.d.ts
 
+# Database
+galaxy-scout.db
+
+# Uploads
+public/uploads/*
+!public/uploads/.gitkeep
+
 # Sisyphus
 .sisyphus/

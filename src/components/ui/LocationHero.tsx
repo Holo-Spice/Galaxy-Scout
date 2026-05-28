@@ -6,8 +6,8 @@ import type { LocationStatus } from "@/lib/constants";
 
 interface LocationHeroLocation {
   name: string;
-  coverImage: string;
-  status: string;
+  coverImage?: string | null;
+  status?: string;
   coordinates?: string;
 }
 
@@ -18,7 +18,6 @@ interface LocationHeroProps {
   priority?: boolean;
   onError?: (e: React.SyntheticEvent<HTMLImageElement>) => void;
   className?: string;
-  /** Custom content for the bottom overlay. Replaces default badge+name+coordinates. */
   children?: React.ReactNode;
 }
 
@@ -32,34 +31,39 @@ export function LocationHero({
   children,
 }: LocationHeroProps) {
   const isDetail = aspectRatio === "21/9";
-
   const aspectClass = isDetail ? "aspect-[21/9]" : "aspect-video";
-
   const gradientClass = isDetail
     ? "bg-gradient-to-t from-surface-1 via-surface-1/30 to-transparent"
     : "bg-gradient-to-t from-surface-1/90 via-surface-1/20 to-transparent";
+  const paddingClass = isDetail ? "bottom-6 left-6 right-6" : "bottom-3 left-3 right-3";
 
-  const paddingClass = isDetail
-    ? "bottom-6 left-6 right-6"
-    : "bottom-3 left-3 right-3";
+  // Fallback when no cover image
+  const hasImage = location.coverImage && location.coverImage.length > 0;
 
   return (
     <div
       className={`relative ${aspectClass} bg-surface-2 overflow-hidden ${isDetail ? "rounded-xl" : ""} ${className ?? ""}`}
     >
-      <Image
-        src={location.coverImage}
-        alt={location.name}
-        fill
-        className={`object-cover${!isDetail ? " transition-transform duration-500 group-hover:scale-105" : ""}`}
-        priority={priority}
-        onError={onError}
-      />
+      {hasImage ? (
+        <Image
+          src={location.coverImage!}
+          alt={location.name}
+          fill
+          className={`object-cover${!isDetail ? " transition-transform duration-500 group-hover:scale-105" : ""}`}
+          priority={priority}
+          onError={onError}
+        />
+      ) : (
+        // Placeholder when no image
+        <div className="absolute inset-0 bg-gradient-to-br from-surface-2 to-surface-1 flex items-center justify-center">
+          <span className="text-4xl opacity-30">🌌</span>
+        </div>
+      )}
       <div className={`absolute inset-0 ${gradientClass}`} />
       <div className={`absolute ${paddingClass}`}>
         {children ?? (
           <>
-            <StatusBadge status={location.status as LocationStatus} />
+            {location.status && <StatusBadge status={location.status as LocationStatus} />}
             {isDetail ? (
               <>
                 <h1 className="text-[32px] font-bold text-ink mt-1">

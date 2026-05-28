@@ -1,16 +1,43 @@
 "use client";
 
-import { useState } from "react";
-import { LocationMarker, DepartureMarker } from "@/components/map/MapMarker";
+import { useEffect, useState } from "react";
+import { LocationMarker } from "@/components/map/MapMarker";
 import { LayerToggle, type Layer } from "@/components/map/LayerToggle";
 import { LocationPanel } from "@/components/map/LocationPanel";
 
-const MARKERS = [
-  { id: 1, name: "天荒坪", x: 32, y: 38, type: "location" as const, score: 92, bortle: 2 },
-  { id: 2, name: "茶山", x: 58, y: 52, type: "location" as const, score: 87, bortle: 3 },
-  { id: 3, name: "坝上", x: 75, y: 28, type: "location" as const, score: 78, bortle: 4 },
-  { id: 4, name: "出发点", x: 45, y: 70, type: "departure" as const },
-];
+interface ApiLocation {
+  id: string;
+  name: string;
+  latitude: number;
+  longitude: number;
+  personal_rating: number | null;
+}
+
+interface MapMarker {
+  id: string;
+  name: string;
+  x: number;
+  y: number;
+  type: "location";
+  score: number;
+  bortle: number;
+}
+
+function toMapMarker(loc: ApiLocation): MapMarker {
+  const lat = loc.latitude;
+  const lng = loc.longitude;
+  const x = Math.max(5, Math.min(95, ((lng - 73) / (135 - 73)) * 100));
+  const y = Math.max(5, Math.min(95, ((50 - lat) / (50 - 30)) * 100));
+  return {
+    id: loc.id,
+    name: loc.name,
+    x,
+    y,
+    type: "location",
+    score: loc.personal_rating ?? 0,
+    bortle: 0,
+  };
+}
 
 const INITIAL_LAYERS: Layer[] = [
   { id: "viirs", label: "VIIRS 辐亮度", active: true },
@@ -19,9 +46,22 @@ const INITIAL_LAYERS: Layer[] = [
 ];
 
 export default function MapPage() {
+  const [markers, setMarkers] = useState<MapMarker[]>([]);
+  const [loading, setLoading] = useState(true);
   const [showDetail, setShowDetail] = useState(true);
   const [layers, setLayers] = useState(INITIAL_LAYERS);
   const [showLayerPanel, setShowLayerPanel] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/locations")
+      .then((res) => res.json())
+      .then((json) => {
+        if (json.error) return;
+        setMarkers((json.data as ApiLocation[]).map(toMapMarker));
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
   const toggleLayer = (id: string) => {
     setLayers((prev) =>
@@ -46,19 +86,23 @@ export default function MapPage() {
           </div>
         </div>
 
-        {MARKERS.map((m) =>
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+            <span className="text-[13px] text-ink-subtle">加载地点中...</span>
+          </div>
+        )}
+
+        {markers.map((m) =>
           m.type === "location" ? (
             <LocationMarker
               key={m.id}
               name={m.name}
               x={m.x}
               y={m.y}
-              score={m.score!}
-              bortle={m.bortle!}
+              score={m.score}
+              bortle={m.bortle}
             />
-          ) : (
-            <DepartureMarker key={m.id} x={m.x} y={m.y} />
-          )
+          ) : null
         )}
 
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 w-[min(480px,calc(100%-2rem))]">

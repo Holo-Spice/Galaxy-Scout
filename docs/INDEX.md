@@ -21,7 +21,9 @@
 - 天文：本地计算，推荐 Astronomy Engine。
 - 地图：MapLibre GL JS，底图遵守瓦片服务政策。
 - 距离：MVP 用 Haversine 直线距离，P1 才接路线服务。
-- 存储：开发期 SQLite，长期可迁移 PostgreSQL/Supabase。
+- 存储：SQLite + Drizzle ORM（开发期），长期可迁移 PostgreSQL/Supabase。
+- 后端：Next.js Route Handlers + Zod 校验。
+- **M1 已完成**：地点 CRUD API、标签管理、收藏切换、本地图片上传、前端 API 集成。
 
 ## 任务路由表
 

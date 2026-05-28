@@ -1,11 +1,13 @@
 "use client";
 
 interface TagListProps {
-  tags: string[];
+  tags?: string[] | null;
   className?: string;
 }
 
 export function TagList({ tags, className }: TagListProps) {
+  if (!tags || !Array.isArray(tags)) return null;
+  
   return (
     <div className={`flex flex-wrap gap-1.5 ${className ?? ""}`}>
       {tags.map((tag) => (

@@ -3,14 +3,25 @@
 import Image from "next/image";
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { type locations } from "@/lib/mock-data";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { TagList } from "@/components/ui/TagList";
 
-type Location = (typeof locations)[number];
+interface LocationCardLocation {
+  id: string;
+  name: string;
+  coverImage: string;
+  tags: string[];
+  coordinates: string;
+  elevation: string;
+  bortle: number;
+  status: "recommended" | "watch" | "not_recommended" | "unknown";
+  score: number;
+  distance: string;
+  cloudCover: number;
+}
 
 interface LocationCardProps {
-  location: Location;
+  location: LocationCardLocation;
 }
 
 function ScoreBar({ score }: { score: number }) {

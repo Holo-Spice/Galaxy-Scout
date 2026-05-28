@@ -7,7 +7,7 @@ export interface StatItem {
 }
 
 interface StatCardGridProps {
-  stats: StatItem[];
+  stats?: StatItem[] | null;
   columns?: number;
   compact?: boolean;
   className?: string;
@@ -19,6 +19,8 @@ export function StatCardGrid({
   compact = false,
   className,
 }: StatCardGridProps) {
+  if (!stats || !Array.isArray(stats)) return null;
+  
   return (
     <div
       className={`grid ${compact ? "gap-3" : "gap-4"} ${className ?? ""}`}

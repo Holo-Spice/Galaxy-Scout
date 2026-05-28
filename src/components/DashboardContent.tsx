@@ -1,8 +1,9 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useTheme } from "./ThemeProvider";
-import { locations } from "@/lib/mock-data";
+import { getLocations, type Location } from "@/lib/api-client";
 import Image from "next/image";
 import Link from "next/link";
 import { LocationHero } from "@/components/ui/LocationHero";
@@ -13,7 +14,7 @@ import { AnimatedNumber } from "@/components/ui/AnimatedNumber";
 import { staggerContainer, staggerItem, useReducedMotion } from "@/lib/animation";
 import { TiltCard } from "@/components/ui/TiltCard";
 
-function GalaxyDashboard() {
+function GalaxyDashboard({ locations }: { locations: Location[] }) {
   const reducedMotion = useReducedMotion();
   const containerVariants = reducedMotion ? {} : staggerContainer;
   const itemVariants = reducedMotion ? {} : staggerItem;
@@ -103,7 +104,7 @@ function GalaxyDashboard() {
   );
 }
 
-function SpaceXDashboard() {
+function SpaceXDashboard({ locations }: { locations: Location[] }) {
   return (
     <div className="space-y-0">
       <section className="relative h-[85vh] -mx-6 -mt-6 flex items-center">
@@ -227,7 +228,7 @@ function SpaceXDashboard() {
   );
 }
 
-function VercelDashboard() {
+function VercelDashboard({ locations }: { locations: Location[] }) {
   return (
     <div className="max-w-5xl mx-auto">
       <header className="mb-12">
@@ -292,7 +293,7 @@ function VercelDashboard() {
   );
 }
 
-function SupabaseDashboard() {
+function SupabaseDashboard({ locations }: { locations: Location[] }) {
   return (
     <div className="space-y-8">
       <header>
@@ -419,15 +420,59 @@ function SupabaseDashboard() {
 
 export function DashboardContent() {
   const { current } = useTheme();
+  const [locations, setLocations] = useState<Location[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    getLocations()
+      .then(setLocations)
+      .catch((e) => setError(e.message))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-8 h-8 border-2 border-accent border-t-transparent rounded-full animate-spin" />
+          <p className="text-[14px] text-ink-muted">加载地点数据中...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="flex flex-col items-center gap-4 text-center">
+          <p className="text-[14px] text-danger">加载失败: {error}</p>
+          <button
+            onClick={() => {
+              setError(null);
+              setLoading(true);
+              getLocations()
+                .then(setLocations)
+                .catch((e) => setError(e.message))
+                .finally(() => setLoading(false));
+            }}
+            className="px-4 py-2 bg-accent text-white rounded-lg text-[13px] font-medium hover:opacity-90 transition-opacity"
+          >
+            重试
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   switch (current) {
     case "spacex":
-      return <SpaceXDashboard />;
+      return <SpaceXDashboard locations={locations as any} />;
     case "vercel":
-      return <VercelDashboard />;
+      return <VercelDashboard locations={locations as any} />;
     case "supabase":
-      return <SupabaseDashboard />;
+      return <SupabaseDashboard locations={locations as any} />;
     default:
-      return <GalaxyDashboard />;
+      return <GalaxyDashboard locations={locations as any} />;
   }
 }

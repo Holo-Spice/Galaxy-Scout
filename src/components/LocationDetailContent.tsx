@@ -1,7 +1,6 @@
 "use client";
 
 import { useTheme } from "@/components/ThemeProvider";
-import { locations } from "@/lib/mock-data";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -9,10 +8,131 @@ import { LocationHero } from "@/components/ui/LocationHero";
 import { StatCardGrid } from "@/components/ui/StatCardGrid";
 import { TagList } from "@/components/ui/TagList";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import {
+  getLocation,
+  updateLocation,
+  getImages,
+  type Location as ApiLocation,
+} from "@/lib/api-client";
+import { useState, useEffect, useCallback } from "react";
 
-function GalaxyLocationDetail({ id }: { id: string }) {
-  const location = locations.find((l) => l.id === id);
-  if (!location) return notFound();
+interface DisplayLocation {
+  id: string;
+  name: string;
+  tags: string[];
+  coverImage: string;
+  coordinates: string;
+  elevation: string;
+  bortle: number;
+  viirs: string | number;
+  status: string;
+  bestHour: string;
+  score: number;
+  distance: string;
+  cloudCover: number;
+  precipitation: number;
+  moonPhase: string;
+  latitude: number;
+  longitude: number;
+  is_favorite: boolean;
+  personal_rating: number | null;
+}
+
+function mapToDisplay(apiLoc: ApiLocation, coverImageUrl?: string): DisplayLocation {
+  const formatCoord = (val: number, pos: string, neg: string) =>
+    `${Math.abs(val).toFixed(1)}° ${val >= 0 ? pos : neg}`;
+  return {
+    id: apiLoc.id,
+    name: apiLoc.name,
+    tags: [],
+    coverImage: coverImageUrl || "/images/landscape-milkyway-1.jpg",
+    coordinates:
+      apiLoc.latitude != null && apiLoc.longitude != null
+        ? `${formatCoord(apiLoc.latitude, "N", "S")}, ${formatCoord(apiLoc.longitude, "E", "W")}`
+        : "--",
+    elevation: apiLoc.elevation_m != null ? `${apiLoc.elevation_m.toLocaleString()}m` : "--",
+    bortle: 0,
+    viirs: "--",
+    status: apiLoc.is_favorite ? "recommended" : "pending",
+    bestHour: "--",
+    score: 0,
+    distance: "--",
+    cloudCover: 0,
+    precipitation: 0,
+    moonPhase: "--",
+    latitude: apiLoc.latitude,
+    longitude: apiLoc.longitude,
+    is_favorite: apiLoc.is_favorite,
+    personal_rating: apiLoc.personal_rating,
+  };
+}
+
+function useLocationDetail(id: string) {
+  const [location, setLocation] = useState<DisplayLocation | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchLocation = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [apiLoc, images] = await Promise.all([
+        getLocation(id),
+        getImages(id).catch(() => []),
+      ]);
+      const coverImage = images.find((img) => img.is_cover && img.url)?.url;
+      setLocation(mapToDisplay(apiLoc, coverImage));
+    } catch (e: any) {
+      setError(e?.message || "加载失败");
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    fetchLocation();
+  }, [fetchLocation]);
+
+  const refetch = useCallback(() => fetchLocation(), [fetchLocation]);
+
+  const toggleFavorite = useCallback(async () => {
+    if (!location) return;
+    const updated = await updateLocation(location.id, { is_favorite: !location.is_favorite });
+    setLocation((prev) => (prev ? { ...prev, is_favorite: updated.is_favorite } : prev));
+  }, [location]);
+
+  return { location, loading, error, refetch, toggleFavorite };
+}
+
+function LoadingSkeleton() {
+  return (
+    <div className="space-y-6 animate-pulse">
+      <div className="aspect-video bg-surface-2 rounded-xl" />
+      <div className="grid grid-cols-4 gap-4">
+        {[1, 2, 3, 4].map((i) => (
+          <div key={i} className="h-20 bg-surface-2 rounded-lg" />
+        ))}
+      </div>
+      <div className="h-40 bg-surface-2 rounded-xl" />
+    </div>
+  );
+}
+
+function ErrorState({ message, onRetry }: { message: string; onRetry: () => void }) {
+  return (
+    <div className="flex flex-col items-center justify-center py-24 gap-4">
+      <p className="text-ink-muted text-[14px]">{message}</p>
+      <button
+        onClick={onRetry}
+        className="px-6 py-2 bg-accent text-white text-[13px] font-medium rounded-lg hover:opacity-90 transition-opacity"
+      >
+        重试
+      </button>
+    </div>
+  );
+}
+
+function GalaxyLocationDetail({ location }: { location: DisplayLocation }) {
 
   return (
     <div className="space-y-6">
@@ -81,9 +201,7 @@ function GalaxyLocationDetail({ id }: { id: string }) {
   );
 }
 
-function SpaceXLocationDetail({ id }: { id: string }) {
-  const location = locations.find((l) => l.id === id);
-  if (!location) return notFound();
+function SpaceXLocationDetail({ location, onToggleFavorite }: { location: DisplayLocation; onToggleFavorite: () => void }) {
 
   return (
     <div className="space-y-0 -m-6">
@@ -107,8 +225,11 @@ function SpaceXLocationDetail({ id }: { id: string }) {
             {location.name}
           </h1>
           <div className="flex gap-4">
-            <button className="px-10 py-4 bg-white text-black text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-white/90 transition-colors">
-              收藏地点
+            <button
+              onClick={onToggleFavorite}
+              className="px-10 py-4 bg-white text-black text-[12px] font-bold tracking-[1.5px] uppercase hover:bg-white/90 transition-colors"
+            >
+              {location.is_favorite ? "取消收藏" : "收藏地点"}
             </button>
             <button className="px-10 py-4 border border-white/20 text-[12px] font-bold tracking-[1.5px] uppercase text-white hover:bg-white/10 transition-colors">
               加入对比
@@ -236,9 +357,7 @@ function SpaceXLocationDetail({ id }: { id: string }) {
   );
 }
 
-function VercelLocationDetail({ id }: { id: string }) {
-  const location = locations.find((l) => l.id === id);
-  if (!location) return notFound();
+function VercelLocationDetail({ location }: { location: DisplayLocation }) {
 
   return (
     <div className="max-w-4xl mx-auto">
@@ -330,9 +449,7 @@ function VercelLocationDetail({ id }: { id: string }) {
   );
 }
 
-function SupabaseLocationDetail({ id }: { id: string }) {
-  const location = locations.find((l) => l.id === id);
-  if (!location) return notFound();
+function SupabaseLocationDetail({ location }: { location: DisplayLocation }) {
 
   return (
     <div className="space-y-6">
@@ -443,15 +560,20 @@ function SupabaseLocationDetail({ id }: { id: string }) {
 
 export function LocationDetailContent({ id }: { id: string }) {
   const { current } = useTheme();
+  const { location, loading, error, refetch, toggleFavorite } = useLocationDetail(id);
+
+  if (loading) return <LoadingSkeleton />;
+  if (error) return <ErrorState message={error} onRetry={refetch} />;
+  if (!location) return notFound();
 
   switch (current) {
     case "spacex":
-      return <SpaceXLocationDetail id={id} />;
+      return <SpaceXLocationDetail location={location} onToggleFavorite={toggleFavorite} />;
     case "vercel":
-      return <VercelLocationDetail id={id} />;
+      return <VercelLocationDetail location={location} />;
     case "supabase":
-      return <SupabaseLocationDetail id={id} />;
+      return <SupabaseLocationDetail location={location} />;
     default:
-      return <GalaxyLocationDetail id={id} />;
+      return <GalaxyLocationDetail location={location} />;
   }
 }
