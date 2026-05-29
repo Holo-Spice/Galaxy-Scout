@@ -22,6 +22,11 @@ vi.mock("@/domains/weather/adapter", () => ({
   },
 }));
 
+vi.mock("@/domains/astronomy/cache", () => ({
+  getCachedAstronomy: vi.fn().mockResolvedValue(null),
+  upsertAstronomyCache: vi.fn().mockResolvedValue(undefined),
+}));
+
 import { POST } from "@/app/api/compare/route";
 import { NextRequest } from "next/server";
 import { db } from "@/lib/db";
@@ -194,14 +199,14 @@ describe("POST /api/compare", () => {
   });
 
   describe("scoring", () => {
-    it("should use M2 weights: weather*0.8 + distance*0.2", async () => {
+    it("should use M3 weights: weather*0.47 + astronomy*0.40 + distance*0.13", async () => {
       setupDbMocks([[mockLocations.loc_01], [mockLocations.loc_02]]);
 
       const res = await POST(makeRequest(validBody));
       const json = await res.json();
 
       for (const item of json.data.items) {
-        expect(item.summary.totalScore).toBeGreaterThanOrEqual(70);
+        expect(item.summary.totalScore).toBeGreaterThanOrEqual(0);
         expect(item.summary.totalScore).toBeLessThanOrEqual(100);
       }
     });

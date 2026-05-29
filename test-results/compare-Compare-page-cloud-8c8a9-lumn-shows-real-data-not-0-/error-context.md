@@ -7,7 +7,7 @@
 # Test info
 
 - Name: compare.spec.ts >> Compare page >> cloud cover column shows real data (not 0)
-- Location: e2e/compare.spec.ts:136:7
+- Location: e2e/compare.spec.ts:138:7
 
 # Error details
 

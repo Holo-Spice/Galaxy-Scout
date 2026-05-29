@@ -80,7 +80,7 @@ weather_score = 100
 - 不输出精确 Bortle。
 - 可以显示估算等级，但必须标记 `estimate` 和 `confidence`。
 
-## 天文分
+## 天文分 ✅ 已实现（M3）
 
 ```text
 astronomy_score = night_score - moon_penalty + milky_way_bonus
@@ -130,7 +130,7 @@ MVP 按直线距离：
 
 ## M2 评分说明（当前实现）
 
-M2 里程碑仅使用天气和距离两项评分，光污染和天文窗口暂不参与。
+M2 里程碑仅使用天气和距离两项评分，光污染和天文窗口暂不参与。M3 已接入天文评分。
 
 ```text
 M2_total_score = weather_score * 0.8 + distance_score * 0.2
@@ -139,7 +139,7 @@ M2_total_score = weather_score * 0.8 + distance_score * 0.2
 - 天气分：按云量、降水、能见度、风速、湿度计算。
 - 距离分：按 Haversine 直线距离查表。
 - 光污染分：M4 接入后参与。
-- 天文分：M3 接入后参与。
+- 天文分：✅ M3 已接入。
 
 ## 排序规则
 

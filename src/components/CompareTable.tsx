@@ -214,7 +214,7 @@ export function CompareTable({ locations }: CompareTableProps) {
                 </CellHighlight>
 
                 <td className="px-3 py-2.5 text-center font-mono text-[13px] leading-tight border-r border-hairline">
-                  {loc.moonPhase != null ? (
+                  {loc.moonPhase != null && loc.moonPhase !== "—" && loc.moonPhase !== "--" ? (
                     <span
                       className={clsx(
                         loc.moonPhase === "新月"

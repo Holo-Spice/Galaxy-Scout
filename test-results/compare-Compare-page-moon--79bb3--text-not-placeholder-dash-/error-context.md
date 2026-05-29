@@ -6,8 +6,8 @@
 
 # Test info
 
-- Name: compare.spec.ts >> Compare page >> unconnected columns (Bortle / VIIRS) show placeholder dash
-- Location: e2e/compare.spec.ts:146:7
+- Name: compare.spec.ts >> Compare page >> moon phase column shows real text (not placeholder dash)
+- Location: e2e/compare.spec.ts:174:7
 
 # Error details
 

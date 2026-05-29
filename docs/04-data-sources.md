@@ -61,7 +61,7 @@ cell_selection=land
 - Bortle 只能标记为 `estimate`。
 - 光污染数据必须显示来源年份和可信度。
 
-## 天文计算
+## 天文计算 ✅ 已实现（M3）
 
 推荐库：Astronomy Engine。
 

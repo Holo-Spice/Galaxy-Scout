@@ -15,6 +15,13 @@
       "when": 1780070009053,
       "tag": "0001_add-weather-cache",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1780082152468,
+      "tag": "0002_modern_logan",
+      "breakpoints": true
     }
   ]
 }

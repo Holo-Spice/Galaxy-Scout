@@ -103,7 +103,7 @@
 - 不得把 `radiance_nw_cm2_sr` 当作 SQM。
 - 不得把估算 Bortle 显示成实测 Bortle。
 
-## `astronomy_hourly_cache`
+## `astronomy_hourly_cache` ✅ 已实现（M3）
 
 | 字段 | 类型 | 说明 |
 | --- | --- | --- |

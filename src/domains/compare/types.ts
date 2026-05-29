@@ -54,6 +54,8 @@ export interface HourlyCompareData {
   visibilityM: number | null;
   windSpeed10mKmh: number | null;
   temperature2mC: number | null;
+  /** 月相中文名称（新月、盈、上弦月、满月、亏、下弦月），由 composer 天文模块填充 */
+  moonPhaseName?: string;
 }
 
 export interface LocationCompareItem {

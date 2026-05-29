@@ -117,3 +117,29 @@ export const weather_hourly_cache = sqliteTable(
     ),
   ],
 );
+
+export const astronomy_hourly_cache = sqliteTable(
+  "astronomy_hourly_cache",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    location_hash: text("location_hash").notNull(),
+    hour_utc: text("hour_utc").notNull(),
+    sun_altitude_deg: real("sun_altitude_deg"),
+    moon_altitude_deg: real("moon_altitude_deg"),
+    moon_illumination_pct: real("moon_illumination_pct"),
+    moon_phase_name: text("moon_phase_name"),
+    galactic_center_altitude_deg: real("galactic_center_altitude_deg"),
+    is_astronomical_night: integer("is_astronomical_night", { mode: "boolean" }),
+    fetched_at: text("fetched_at").notNull(),
+    expires_at: text("expires_at").notNull(),
+  },
+  (table) => [
+    uniqueIndex("astronomy_hourly_cache_loc_hour_idx").on(
+      table.location_hash,
+      table.hour_utc,
+    ),
+    index("astronomy_hourly_cache_expires_at_idx").on(table.expires_at),
+  ],
+);

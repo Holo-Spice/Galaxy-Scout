@@ -7,7 +7,7 @@
 # Test info
 
 - Name: compare.spec.ts >> Compare page >> loads and displays location list
-- Location: e2e/compare.spec.ts:128:7
+- Location: e2e/compare.spec.ts:130:7
 
 # Error details
 

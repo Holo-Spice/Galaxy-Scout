@@ -57,7 +57,7 @@ function toTableLocation(
         : "—",
     cloudCover: best?.cloudCoverPct ?? 0,
     precipitation: best?.precipitationMm ?? 0,
-    moonPhase: "—",
+    moonPhase: best?.moonPhaseName ?? "—",
   };
 }
 

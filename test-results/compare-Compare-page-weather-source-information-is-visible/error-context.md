@@ -7,7 +7,7 @@
 # Test info
 
 - Name: compare.spec.ts >> Compare page >> weather source information is visible
-- Location: e2e/compare.spec.ts:164:7
+- Location: e2e/compare.spec.ts:166:7
 
 # Error details
 

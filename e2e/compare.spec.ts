@@ -56,7 +56,7 @@ const mockCompareResult = {
           hourLocal: "2025-01-01T22:00",
           weatherScore: 85,
           lightScore: 0,
-          astronomyScore: 0,
+          astronomyScore: 78,
           distanceScore: 90,
           totalScore: 82,
           recommendation: "recommended",
@@ -66,6 +66,7 @@ const mockCompareResult = {
           visibilityM: 20000,
           windSpeed10mKmh: 5,
           temperature2mC: -8,
+          moonPhaseName: "新月",
         },
       ],
     },
@@ -85,7 +86,7 @@ const mockCompareResult = {
           hourLocal: "2025-01-01T23:00",
           weatherScore: 70,
           lightScore: 0,
-          astronomyScore: 0,
+          astronomyScore: 45,
           distanceScore: 60,
           totalScore: 68,
           recommendation: "watch",
@@ -95,6 +96,7 @@ const mockCompareResult = {
           visibilityM: 15000,
           windSpeed10mKmh: 12,
           temperature2mC: -12,
+          moonPhaseName: "上弦月",
         },
       ],
     },
@@ -167,5 +169,14 @@ test.describe("Compare page", () => {
 
     await expect(page.locator("text=天气数据来源")).toBeVisible();
     await expect(page.locator("text=Open-Meteo")).toBeVisible();
+  });
+
+  test("moon phase column shows real text (not placeholder dash)", async ({ page }) => {
+    await page.goto("/compare");
+    await page.waitForLoadState("networkidle");
+
+    await expect(page.locator("th", { hasText: "月相" })).toBeVisible();
+    await expect(page.locator("text=新月")).toBeVisible();
+    await expect(page.locator("text=上弦月")).toBeVisible();
   });
 });

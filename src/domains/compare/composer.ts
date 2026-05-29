@@ -8,9 +8,16 @@ import {
 } from "@/domains/weather/cache";
 import { scoreWeatherHourly } from "@/domains/compare/weather-scoring";
 import { scoreDistance } from "@/domains/compare/distance-scoring";
+import { scoreAstronomyHourly } from "@/domains/compare/astronomy-scoring";
+import { computeHourlyAstronomy } from "@/domains/astronomy/engine";
+import {
+  getCachedAstronomy,
+  upsertAstronomyCache,
+} from "@/domains/astronomy/cache";
 import { generateLocationHash } from "@/lib/geo/location-hash";
 import { haversineDistance } from "@/lib/geo";
 import type { WeatherHourlyData } from "@/domains/weather/types";
+import type { AstronomyHourlyData } from "@/domains/astronomy/types";
 import type {
   CompareRequest,
   CompareResult,
@@ -21,8 +28,14 @@ import type {
   Recommendation,
 } from "@/domains/compare/types";
 
+/** @deprecated M2 二因子权重，M4 统一清理 */
 const M2_WEATHER_WEIGHT = 0.8;
+/** @deprecated M2 二因子权重，M4 统一清理 */
 const M2_DISTANCE_WEIGHT = 0.2;
+
+const M3_WEATHER_WEIGHT = 0.47;
+const M3_ASTRONOMY_WEIGHT = 0.40;
+const M3_DISTANCE_WEIGHT = 0.13;
 
 interface LocationRow {
   id: string;
@@ -88,6 +101,42 @@ async function resolveHourlyData(
       const utcHour = hours[idx].utc;
       const match = hourlyForLoc.find((h) => h.forecast_hour_utc === utcHour);
       results[idx] = match ?? makeEmptyHourlyData(utcHour);
+    }
+  }
+
+  return results;
+}
+
+async function resolveAstronomyData(
+  loc: LocationRow,
+  hours: { local: string; utc: string }[],
+): Promise<AstronomyHourlyData[]> {
+  const locationHash = generateLocationHash(loc.latitude, loc.longitude);
+
+  const results: AstronomyHourlyData[] = [];
+  const uncachedIndices: number[] = [];
+  const uncachedUtcHours: string[] = [];
+
+  for (let i = 0; i < hours.length; i++) {
+    const cached = await getCachedAstronomy(locationHash, hours[i].utc);
+    if (cached !== null) {
+      results[i] = cached;
+    } else {
+      uncachedIndices.push(i);
+      uncachedUtcHours.push(hours[i].utc);
+    }
+  }
+
+  if (uncachedIndices.length > 0) {
+    const computed = computeHourlyAstronomy(
+      { latitude: loc.latitude, longitude: loc.longitude, dateLocal: "", timezone: "" },
+      uncachedUtcHours,
+    );
+
+    await upsertAstronomyCache(locationHash, computed);
+
+    for (let j = 0; j < uncachedIndices.length; j++) {
+      results[uncachedIndices[j]] = computed[j];
     }
   }
 
@@ -168,6 +217,7 @@ function makeEmptyHourlyData(utcHour: string): WeatherHourlyData {
 
 function computeHourlyScores(
   hourlyData: WeatherHourlyData[],
+  astronomyData: AstronomyHourlyData[],
   distanceKm: number | null,
   hours: { local: string; utc: string }[],
 ): { hourly: HourlyCompareData[]; bestIndex: number } {
@@ -177,10 +227,13 @@ function computeHourlyScores(
 
   for (let i = 0; i < hourlyData.length; i++) {
     const weather = scoreWeatherHourly(hourlyData[i]);
+    const astro = scoreAstronomyHourly(astronomyData[i]);
     const dist = distanceKm !== null ? scoreDistance(distanceKm) : { score: 100, label: "" };
 
     const totalScore = Math.round(
-      weather.score * M2_WEATHER_WEIGHT + dist.score * M2_DISTANCE_WEIGHT,
+      weather.score * M3_WEATHER_WEIGHT +
+      astro.score * M3_ASTRONOMY_WEIGHT +
+      dist.score * M3_DISTANCE_WEIGHT,
     );
 
     const recommendation: Recommendation =
@@ -196,12 +249,12 @@ function computeHourlyScores(
       hourLocal: hours[i]?.local ?? "",
       weatherScore: weather.score,
       lightScore: 0,
-      astronomyScore: 0,
+      astronomyScore: astro.score,
       distanceScore: dist.score,
       totalScore,
       recommendation,
-      topReasons: weather.reasons,
-      risks: weather.risks,
+      topReasons: [...weather.reasons, ...astro.reasons],
+      risks: [...(weather.risks ?? []), ...(astro.risks ?? [])],
       cloudCoverPct: hourlyData[i].cloud_cover_pct,
       precipitationMm: hourlyData[i].precipitation_mm,
       visibilityM: hourlyData[i].visibility_m,
@@ -257,6 +310,8 @@ export async function composeCompareResult(
       req.timezone,
     );
 
+    const astronomyData = await resolveAstronomyData(loc, hours);
+
     const distanceKm =
       req.origin !== undefined
         ? haversineDistance(
@@ -269,6 +324,7 @@ export async function composeCompareResult(
 
     const { hourly, bestIndex } = computeHourlyScores(
       hourlyData,
+      astronomyData,
       distanceKm,
       hours,
     );
