@@ -55,19 +55,19 @@ function GalaxyDashboard({ locations }: { locations: Location[] }) {
                   compact
                   columns={2}
                   stats={[
-                    { label: "坐标", value: loc.coordinates },
-                    { label: "海拔", value: loc.elevation },
+                    { label: "坐标", value: loc.coordinates ?? "—" },
+                    { label: "海拔", value: loc.elevation ?? "—" },
                     {
                       label: "Bortle",
-                      value: `B${loc.bortle}`,
+                      value: `B${loc.bortle ?? 0}`,
                       colorClass:
-                        loc.bortle <= 2
+                        (loc.bortle ?? 0) <= 2
                           ? "text-success"
-                          : loc.bortle <= 4
+                          : (loc.bortle ?? 0) <= 4
                             ? "text-warning"
                             : "text-danger",
                     },
-                    { label: "距离", value: loc.distance },
+                    { label: "距离", value: loc.distance ?? "—" },
                   ]}
                 />
 
@@ -77,20 +77,20 @@ function GalaxyDashboard({ locations }: { locations: Location[] }) {
                       综合评分
                     </span>
                     <AnimatedNumber
-                      value={loc.score}
+                      value={loc.score ?? 0}
                       className="text-[18px] font-bold font-mono text-accent"
                     />
                   </div>
                   <div className="mt-1.5 h-1.5 rounded-full bg-surface-3 overflow-hidden">
                     <div
                       className={`h-full rounded-full ${
-                        loc.score >= 85
+                        (loc.score ?? 0) >= 85
                           ? "bg-success"
-                          : loc.score >= 60
+                          : (loc.score ?? 0) >= 60
                             ? "bg-warning"
                             : "bg-danger"
                       }`}
-                      style={{ width: `${loc.score}%` }}
+                      style={{ width: `${loc.score ?? 0}%` }}
                     />
                   </div>
                 </div>
@@ -152,7 +152,7 @@ function SpaceXDashboard({ locations }: { locations: Location[] }) {
             <Link key={loc.id} href={`/locations/${loc.id}`} className="group">
               <div className="relative aspect-[16/10] mb-8 overflow-hidden">
                 <Image
-                  src={loc.coverImage}
+                  src={loc.coverImage ?? "/images/landscape-milkyway-2.jpg"}
                   alt={loc.name}
                   fill
                   className="object-cover transition-transform duration-1000 group-hover:scale-105"
@@ -278,10 +278,10 @@ function VercelDashboard({ locations }: { locations: Location[] }) {
                 compact
                 columns={4}
                 stats={[
-                  { label: "Bortle", value: `B${loc.bortle}` },
-                  { label: "海拔", value: loc.elevation },
-                  { label: "距离", value: loc.distance },
-                  { label: "云量", value: `${loc.cloudCover}%` },
+                  { label: "Bortle", value: `B${loc.bortle ?? 0}` },
+                  { label: "海拔", value: loc.elevation ?? "—" },
+                  { label: "距离", value: loc.distance ?? "—" },
+                  { label: "云量", value: `${loc.cloudCover ?? 0}%` },
                 ]}
                 className="pt-4 border-t border-[rgba(0,0,0,0.06)]"
               />
@@ -352,7 +352,7 @@ function SupabaseDashboard({ locations }: { locations: Location[] }) {
             <div className="flex">
               <div className="relative w-48 shrink-0">
                 <Image
-                  src={loc.coverImage}
+                  src={loc.coverImage ?? "/images/desert-night.jpg"}
                   alt={loc.name}
                   fill
                   className="object-cover"
@@ -370,7 +370,7 @@ function SupabaseDashboard({ locations }: { locations: Location[] }) {
                       <span className="text-[11px] font-mono text-ink-subtle">
                         [{i}]
                       </span>
-                      <StatusBadge status={loc.status} />
+                      <StatusBadge status={loc.status ?? "unknown"} />
                     </div>
                     <h3 className="text-[16px] font-semibold text-ink">
                       {loc.name}
@@ -394,17 +394,17 @@ function SupabaseDashboard({ locations }: { locations: Location[] }) {
                   stats={[
                     {
                       label: "BORTLE",
-                      value: loc.bortle,
+                      value: loc.bortle ?? 0,
                       colorClass:
-                        loc.bortle <= 2
+                        (loc.bortle ?? 0) <= 2
                           ? "text-emerald-400"
-                          : loc.bortle <= 4
+                          : (loc.bortle ?? 0) <= 4
                             ? "text-warning"
                             : "text-danger",
                     },
-                    { label: "VIIRS", value: loc.viirs },
-                    { label: "ELEV", value: loc.elevation },
-                    { label: "DIST", value: loc.distance },
+                    { label: "VIIRS", value: loc.viirs ?? 0 },
+                    { label: "ELEV", value: loc.elevation ?? "—" },
+                    { label: "DIST", value: loc.distance ?? "—" },
                     { label: "CLOUD", value: `${loc.cloudCover}%` },
                   ]}
                   className="pt-3 border-t border-hairline"
