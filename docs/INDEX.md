@@ -24,6 +24,7 @@
 - 存储：SQLite + Drizzle ORM（开发期），长期可迁移 PostgreSQL/Supabase。
 - 后端：Next.js Route Handlers + Zod 校验。
 - **M1 已完成**：地点 CRUD API、标签管理、收藏切换、本地图片上传、前端 API 集成。
+- **M2 已完成**：Open-Meteo 天气适配器、天气逐小时缓存、POST /api/compare 对比接口、天气+距离评分。
 
 ## 任务路由表
 

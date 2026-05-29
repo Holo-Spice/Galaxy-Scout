@@ -40,23 +40,23 @@ export const RISK_THRESHOLDS = {
 } as const;
 
 export function getRiskTags(loc: {
-  bortle: number;
+  bortle: number | null;
   cloudCover: number;
   precipitation: number;
-  moonPhase: string;
-  distance: string;
+  moonPhase: string | null;
+  distance: string | null;
   bestHour: string;
 }): string[] {
   const risks: string[] = [];
-  if (loc.bortle >= RISK_THRESHOLDS.BORTLE_HIGH) risks.push("光害严重");
-  else if (loc.bortle >= RISK_THRESHOLDS.BORTLE_MEDIUM) risks.push("光害中等");
+  if (loc.bortle != null && loc.bortle >= RISK_THRESHOLDS.BORTLE_HIGH) risks.push("光害严重");
+  else if (loc.bortle != null && loc.bortle >= RISK_THRESHOLDS.BORTLE_MEDIUM) risks.push("光害中等");
   if (loc.cloudCover >= RISK_THRESHOLDS.CLOUD_HIGH) risks.push("多云");
   else if (loc.cloudCover >= RISK_THRESHOLDS.CLOUD_MEDIUM) risks.push("有云");
   if (loc.precipitation >= RISK_THRESHOLDS.PRECIP_HIGH) risks.push("降水风险");
   else if (loc.precipitation >= RISK_THRESHOLDS.PRECIP_MEDIUM) risks.push("少量降水");
-  if (loc.moonPhase !== "新月") risks.push("月光干扰");
-  const distNum = parseInt(loc.distance);
-  if (distNum >= RISK_THRESHOLDS.DISTANCE_FAR) risks.push("路途遥远");
+  if (loc.moonPhase != null && loc.moonPhase !== "新月") risks.push("月光干扰");
+  const distNum = loc.distance != null ? parseInt(loc.distance) : NaN;
+  if (!isNaN(distNum) && distNum >= RISK_THRESHOLDS.DISTANCE_FAR) risks.push("路途遥远");
   if (loc.bestHour === "N/A") risks.push("无观测窗口");
   return risks;
 }

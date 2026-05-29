@@ -60,7 +60,7 @@ DELETE /api/locations/:id
 - 删除默认软删除。
 - 坐标变更后要触发相关缓存失效。
 
-## 对比 API
+## 对比 API ✅ 已实现（M2：仅天气+距离评分）
 
 ```text
 POST /api/compare

@@ -11,15 +11,15 @@ interface Location {
   coverImage: string;
   coordinates: string;
   elevation: string;
-  bortle: number;
-  viirs: number;
+  bortle: number | null;
+  viirs: number | null;
   status: LocationStatus | (string & {});
   bestHour: string;
   score: number;
-  distance: string;
+  distance: string | null;
   cloudCover: number;
   precipitation: number;
-  moonPhase: string;
+  moonPhase: string | null;
 }
 
 interface CompareTableProps {
@@ -30,19 +30,25 @@ function bestScore(locations: Location[]): number {
   return Math.max(...locations.map((l) => l.score));
 }
 
+function safeMin(values: (number | null)[]): number {
+  const valid = values.filter((v): v is number => v != null && v !== 0);
+  return valid.length > 0 ? Math.min(...valid) : 0;
+}
+
 function bestBortle(locations: Location[]): number {
-  return Math.min(...locations.map((l) => l.bortle));
+  return safeMin(locations.map((l) => l.bortle));
 }
 
 function bestViirs(locations: Location[]): number {
-  return Math.min(...locations.map((l) => l.viirs));
+  return safeMin(locations.map((l) => l.viirs));
 }
 
 function bestCloud(locations: Location[]): number {
   return Math.min(...locations.map((l) => l.cloudCover));
 }
 
-function parseDistance(d: string): number {
+function parseDistance(d: string | null): number {
+  if (d == null) return Infinity;
   return parseInt(d) || 0;
 }
 
@@ -175,15 +181,17 @@ export function CompareTable({ locations }: CompareTableProps) {
                   <StatusBadge status={loc.status} />
                 </td>
 
-                <CellHighlight isBest={loc.bortle === _bestBortle}>
-                  <span className="tabular-nums">{loc.bortle}</span>
+                <CellHighlight isBest={loc.bortle != null && loc.bortle !== 0 && loc.bortle === _bestBortle}>
+                  <span className="tabular-nums">{loc.bortle != null && loc.bortle !== 0 ? loc.bortle : "—"}</span>
                 </CellHighlight>
 
-                <CellHighlight isBest={loc.viirs === _bestViirs}>
-                  <span className="tabular-nums">{loc.viirs}</span>
-                  <span className="text-[10px] text-ink-subtle ml-0.5">
-                    nW
-                  </span>
+                <CellHighlight isBest={loc.viirs != null && loc.viirs !== 0 && loc.viirs === _bestViirs}>
+                  <span className="tabular-nums">{loc.viirs != null && loc.viirs !== 0 ? loc.viirs : "—"}</span>
+                  {loc.viirs != null && loc.viirs !== 0 && (
+                    <span className="text-[10px] text-ink-subtle ml-0.5">
+                      nW
+                    </span>
+                  )}
                 </CellHighlight>
 
                 <CellHighlight isBest={loc.cloudCover === _bestCloud}>
@@ -206,21 +214,25 @@ export function CompareTable({ locations }: CompareTableProps) {
                 </CellHighlight>
 
                 <td className="px-3 py-2.5 text-center font-mono text-[13px] leading-tight border-r border-hairline">
-                  <span
-                    className={clsx(
-                      loc.moonPhase === "新月"
-                        ? "text-success"
-                        : "text-warning"
-                    )}
-                  >
-                    {loc.moonPhase}
-                  </span>
+                  {loc.moonPhase != null ? (
+                    <span
+                      className={clsx(
+                        loc.moonPhase === "新月"
+                          ? "text-success"
+                          : "text-warning"
+                      )}
+                    >
+                      {loc.moonPhase}
+                    </span>
+                  ) : (
+                    <span className="text-ink-subtle">—</span>
+                  )}
                 </td>
 
                 <CellHighlight
-                  isBest={parseDistance(loc.distance) === _bestDist}
+                  isBest={loc.distance != null && parseDistance(loc.distance) === _bestDist}
                 >
-                  <span className="tabular-nums">{loc.distance}</span>
+                  <span className="tabular-nums">{loc.distance ?? "—"}</span>
                 </CellHighlight>
 
                 <td className="px-3 py-2.5">

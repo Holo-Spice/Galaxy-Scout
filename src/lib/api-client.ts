@@ -1,3 +1,5 @@
+import type { CompareRequest, CompareResult } from "@/domains/compare/types";
+
 const BASE_URL = "";
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
@@ -78,4 +80,8 @@ export async function updateImage(imageId: string, input: Partial<Image>): Promi
 
 export async function deleteImage(imageId: string): Promise<void> {
   return request<void>(`/api/images/${imageId}`, { method: "DELETE" });
+}
+
+export async function getCompare(req: CompareRequest): Promise<CompareResult> {
+  return request<CompareResult>("/api/compare", { method: "POST", body: JSON.stringify(req) });
 }

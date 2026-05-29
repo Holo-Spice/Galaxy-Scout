@@ -79,3 +79,41 @@ export const spot_images = sqliteTable("spot_images", {
     .notNull()
     .$defaultFn(() => new Date().toISOString()),
 });
+
+export const weather_hourly_cache = sqliteTable(
+  "weather_hourly_cache",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    location_hash: text("location_hash").notNull(),
+    provider: text("provider").notNull().default("open-meteo"),
+    forecast_hour_utc: text("forecast_hour_utc").notNull(),
+    fetched_at: text("fetched_at").notNull(),
+    expires_at: text("expires_at").notNull(),
+    temperature_2m_c: real("temperature_2m_c"),
+    relative_humidity_2m_pct: real("relative_humidity_2m_pct"),
+    dew_point_2m_c: real("dew_point_2m_c"),
+    precipitation_probability_pct: real("precipitation_probability_pct"),
+    precipitation_mm: real("precipitation_mm"),
+    cloud_cover_pct: real("cloud_cover_pct"),
+    cloud_cover_low_pct: real("cloud_cover_low_pct"),
+    cloud_cover_mid_pct: real("cloud_cover_mid_pct"),
+    cloud_cover_high_pct: real("cloud_cover_high_pct"),
+    visibility_m: real("visibility_m"),
+    wind_speed_10m_kmh: real("wind_speed_10m_kmh"),
+    wind_gusts_10m_kmh: real("wind_gusts_10m_kmh"),
+    weather_code: real("weather_code"),
+  },
+  (table) => [
+    uniqueIndex("weather_hourly_cache_loc_hour_idx").on(
+      table.location_hash,
+      table.forecast_hour_utc,
+    ),
+    index("weather_hourly_cache_expires_at_idx").on(table.expires_at),
+    index("weather_hourly_cache_loc_provider_idx").on(
+      table.location_hash,
+      table.provider,
+    ),
+  ],
+);

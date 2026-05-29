@@ -1,6 +1,6 @@
 # 外部数据源
 
-## 天气：Open-Meteo
+## 天气：Open-Meteo ✅ 已实现（M2）
 
 接口：
 

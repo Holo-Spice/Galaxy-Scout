@@ -59,7 +59,7 @@
 
 约束：同一地点最多一个 active 封面图。
 
-## `weather_hourly_cache`
+## `weather_hourly_cache` ✅ 已实现（M2）
 
 | 字段 | 类型 | 说明 |
 | --- | --- | --- |
