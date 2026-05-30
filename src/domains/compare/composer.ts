@@ -260,6 +260,7 @@ function computeHourlyScores(
       visibilityM: hourlyData[i].visibility_m,
       windSpeed10mKmh: hourlyData[i].wind_speed_10m_kmh,
       temperature2mC: hourlyData[i].temperature_2m_c,
+      moonPhaseName: astronomyData[i]?.moon_phase_name,
     };
 
     if (totalScore > bestTotal) {
