@@ -50,12 +50,16 @@ const mockCompareResult = {
         recommendation: "recommended",
         topReasons: ["云量低", "距离近"],
       },
-      lightPollution: null,
+      lightPollution: {
+        source: "viirs_2023",
+        sourceYear: 2023,
+        confidence: "medium",
+      },
       hourly: [
         {
           hourLocal: "2025-01-01T22:00",
           weatherScore: 85,
-          lightScore: 0,
+          lightScore: 75,
           astronomyScore: 78,
           distanceScore: 90,
           totalScore: 82,
@@ -74,21 +78,25 @@ const mockCompareResult = {
       locationId: "loc-2",
       summary: {
         bestHourLocal: "23:00",
-        totalScore: 68,
+        totalScore: 55,
         distanceKm: 280,
         distanceMode: "driving",
         recommendation: "watch",
         topReasons: ["距离较远"],
       },
-      lightPollution: null,
+      lightPollution: {
+        source: "viirs_2023",
+        sourceYear: 2023,
+        confidence: "low",
+      },
       hourly: [
         {
           hourLocal: "2025-01-01T23:00",
           weatherScore: 70,
-          lightScore: 0,
+          lightScore: 45,
           astronomyScore: 45,
           distanceScore: 60,
-          totalScore: 68,
+          totalScore: 55,
           recommendation: "watch",
           topReasons: [],
           cloudCoverPct: 40,
@@ -178,5 +186,25 @@ test.describe("Compare page", () => {
     await expect(page.locator("th", { hasText: "月相" })).toBeVisible();
     await expect(page.locator("text=新月")).toBeVisible();
     await expect(page.locator("text=上弦月")).toBeVisible();
+  });
+
+  test("light pollution layer toggle is visible on map page", async ({ page }) => {
+    await page.goto("/map");
+    await page.waitForLoadState("networkidle");
+
+    await expect(page.locator("text=VIIRS 辐亮度")).toBeVisible();
+  });
+
+  test("light pollution data source info is available in API response", async ({ page }) => {
+    const responsePromise = page.waitForResponse("**/api/compare");
+    await page.goto("/compare");
+    const response = await responsePromise;
+    const json = await response.json();
+
+    const firstItem = json.data.items[0];
+    expect(firstItem.lightPollution).toBeTruthy();
+    expect(firstItem.lightPollution.source).toBe("viirs_2023");
+    expect(firstItem.lightPollution.sourceYear).toBe(2023);
+    expect(firstItem.lightPollution.confidence).toBe("medium");
   });
 });

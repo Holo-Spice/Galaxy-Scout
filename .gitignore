@@ -41,5 +41,11 @@ galaxy-scout.db
 public/uploads/*
 !public/uploads/.gitkeep
 
+# Data
+data/viirs/
+
+# Generated tiles
+public/tiles/
+
 # Sisyphus
 .sisyphus/

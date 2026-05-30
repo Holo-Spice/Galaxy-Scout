@@ -143,3 +143,27 @@ export const astronomy_hourly_cache = sqliteTable(
     index("astronomy_hourly_cache_expires_at_idx").on(table.expires_at),
   ],
 );
+
+export const lightPollutionSamples = sqliteTable(
+  "light_pollution_samples",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    latitude: real("latitude").notNull(),
+    longitude: real("longitude").notNull(),
+    viirs_radiance: real("viirs_radiance"),
+    darkness_class: integer("darkness_class"),
+    sqm_estimate: real("sqm_estimate"),
+    bortle_estimate: integer("bortle_estimate"),
+    source: text("source").notNull(),
+    source_year: integer("source_year").notNull(),
+    created_at: text("created_at")
+      .notNull()
+      .$defaultFn(() => new Date().toISOString()),
+  },
+  (table) => [
+    index("lp_samples_lat_lng_idx").on(table.latitude, table.longitude),
+    index("lp_samples_source_year_idx").on(table.source, table.source_year),
+  ],
+);

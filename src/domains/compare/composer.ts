@@ -16,6 +16,8 @@ import {
 } from "@/domains/astronomy/cache";
 import { generateLocationHash } from "@/lib/geo/location-hash";
 import { haversineDistance } from "@/lib/geo";
+import { queryLightPollution } from "@/domains/light-pollution/query";
+import { scoreLightPollution } from "@/domains/light-pollution/scoring";
 import type { WeatherHourlyData } from "@/domains/weather/types";
 import type { AstronomyHourlyData } from "@/domains/astronomy/types";
 import type {
@@ -28,14 +30,10 @@ import type {
   Recommendation,
 } from "@/domains/compare/types";
 
-/** @deprecated M2 二因子权重，M4 统一清理 */
-const M2_WEATHER_WEIGHT = 0.8;
-/** @deprecated M2 二因子权重，M4 统一清理 */
-const M2_DISTANCE_WEIGHT = 0.2;
-
-const M3_WEATHER_WEIGHT = 0.47;
-const M3_ASTRONOMY_WEIGHT = 0.40;
-const M3_DISTANCE_WEIGHT = 0.13;
+const M4_LIGHT_WEIGHT = 0.25;
+const M4_WEATHER_WEIGHT = 0.40;
+const M4_ASTRO_WEIGHT = 0.25;
+const M4_DISTANCE_WEIGHT = 0.10;
 
 interface LocationRow {
   id: string;
@@ -220,6 +218,7 @@ function computeHourlyScores(
   astronomyData: AstronomyHourlyData[],
   distanceKm: number | null,
   hours: { local: string; utc: string }[],
+  lightScore: number,
 ): { hourly: HourlyCompareData[]; bestIndex: number } {
   const scored: HourlyCompareData[] = [];
   let bestIndex = 0;
@@ -231,9 +230,10 @@ function computeHourlyScores(
     const dist = distanceKm !== null ? scoreDistance(distanceKm) : { score: 100, label: "" };
 
     const totalScore = Math.round(
-      weather.score * M3_WEATHER_WEIGHT +
-      astro.score * M3_ASTRONOMY_WEIGHT +
-      dist.score * M3_DISTANCE_WEIGHT,
+      lightScore * M4_LIGHT_WEIGHT +
+      weather.score * M4_WEATHER_WEIGHT +
+      astro.score * M4_ASTRO_WEIGHT +
+      dist.score * M4_DISTANCE_WEIGHT,
     );
 
     const recommendation: Recommendation =
@@ -248,7 +248,7 @@ function computeHourlyScores(
     const entry: HourlyCompareData = {
       hourLocal: hours[i]?.local ?? "",
       weatherScore: weather.score,
-      lightScore: 0,
+      lightScore,
       astronomyScore: astro.score,
       distanceScore: dist.score,
       totalScore,
@@ -323,11 +323,30 @@ export async function composeCompareResult(
           )
         : null;
 
+    let lightScore = 0;
+    let lightPollutionInfo: import("@/domains/compare/types").LightPollutionInfo | null = null;
+    try {
+      const lightResult = await queryLightPollution(loc.latitude, loc.longitude);
+      const lightScoreResult = scoreLightPollution(lightResult);
+      lightScore = lightScoreResult.score;
+      lightPollutionInfo = {
+        source: lightResult.source,
+        sourceYear: lightResult.sourceYear,
+        confidence: lightResult.confidence,
+        radiance: lightResult.radiance,
+        bortleEstimate: lightResult.bortleEstimate,
+      };
+    } catch {
+      lightScore = 0;
+      lightPollutionInfo = null;
+    }
+
     const { hourly, bestIndex } = computeHourlyScores(
       hourlyData,
       astronomyData,
       distanceKm,
       hours,
+      lightScore,
     );
 
     const bestHour = hourly[bestIndex];
@@ -349,7 +368,7 @@ export async function composeCompareResult(
     items.push({
       locationId: loc.id,
       summary,
-      lightPollution: null,
+      lightPollution: lightPollutionInfo,
       hourly,
     });
   }

@@ -83,24 +83,29 @@
 | `wind_gusts_10m_kmh` | number/null | 阵风 |
 | `weather_code` | number/null | WMO 天气代码 |
 
-## `light_pollution_samples`
+## `light_pollution_samples` ✅ 已实现（M4）
 
 | 字段 | 类型 | 说明 |
 | --- | --- | --- |
 | `id` | string | 主键 |
-| `location_hash` | string | 坐标 hash |
-| `source` | string | `eog-vnl` / `world-atlas` / `black-marble` |
-| `source_year` | number/null | 数据年份 |
-| `radiance_nw_cm2_sr` | number/null | VIIRS 辐亮度 |
-| `sqm_mag_arcsec2` | number/null | 天空亮度 |
-| `bortle_estimate` | number/null | 估算 Bortle |
-| `darkness_class` | string | `excellent` / `good` / `fair` / `poor` / `bad` |
-| `confidence` | string | `high` / `medium` / `low` |
-| `sampled_at` | datetime | 查询时间 |
+| `latitude` | number | WGS84 纬度 |
+| `longitude` | number | WGS84 经度 |
+| `viirs_radiance` | number/null | VIIRS 辐亮度 (nW·cm⁻²·sr⁻¹) |
+| `darkness_class` | number/null | 暗天等级 1-5（1 最暗，5 最亮） |
+| `sqm_estimate` | number/null | 估算天空亮度 (mag/arcsec²) |
+| `bortle_estimate` | number/null | 估算 Bortle 等级 |
+| `source` | string | 数据来源（如 `eog-vnl`） |
+| `source_year` | number | 数据年份 |
+| `created_at` | datetime | 查询时间 |
+
+索引：
+
+- `(latitude, longitude)`
+- `(source, source_year)`
 
 禁止事项：
 
-- 不得把 `radiance_nw_cm2_sr` 当作 SQM。
+- 不得把 `viirs_radiance` 当作 SQM。
 - 不得把估算 Bortle 显示成实测 Bortle。
 
 ## `astronomy_hourly_cache` ✅ 已实现（M3）

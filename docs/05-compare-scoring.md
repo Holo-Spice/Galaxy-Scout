@@ -61,7 +61,7 @@ weather_score = 100
 - `cloud_cover_pct > 70 && cloud_cover_high_pct > 50`：默认 `not_recommended`。
 - 关键字段缺失：不直接扣满分，但降低 confidence。
 
-## 光污染分
+## 光污染分 ✅ 已实现（M4）
 
 如果有 SQM：
 
@@ -74,11 +74,21 @@ weather_score = 100
 | `19.0 - 20.0` | 30 |
 | `< 19.0` | 10 |
 
-如果只有 VIIRS：
+如果没有 SQM，使用 darkness_class（1-5）：
 
-- 使用项目内分位数或人工标定阈值生成 `darkness_class`。
-- 不输出精确 Bortle。
-- 可以显示估算等级，但必须标记 `estimate` 和 `confidence`。
+| darkness_class | 辐亮度范围 (nW·cm⁻²·sr⁻¹) | 分数 | 标签 |
+| --- | --- | --- | --- |
+| 1 | `<= 0.5` | 100 | 极暗 |
+| 2 | `0.5 - 2` | 85 | 暗 |
+| 3 | `2 - 5` | 70 | 中等 |
+| 4 | `5 - 15` | 50 | 较亮 |
+| 5 | `> 15` | 10 | 明亮 |
+
+禁止事项：
+
+- Bortle 始终标记为 `estimate`，不输出精确 Bortle 等级。
+- `darkness_class` 由 VIIRS 辐亮度阈值生成，不代表实测天空亮度。
+- 无任何光污染数据时，分数为 0，标签为"无数据"。
 
 ## 天文分 ✅ 已实现（M3）
 

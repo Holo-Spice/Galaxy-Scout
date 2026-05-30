@@ -35,13 +35,9 @@ cell_selection=land
 - provider 失败时优先返回未过期缓存；如果只有过期缓存，返回并标记 `stale=true`。
 - UI 必须显示天气来源和更新时间。
 
-## 光污染
+## 光污染 ✅ 已实现（M4）
 
-优先级：
-
-1. World Atlas sky brightness 栅格：如果合法获得，优先用于 SQM 和 Bortle 估算。
-2. NOAA/EOG VIIRS Nighttime Lights VNL：用于夜光辐亮度和暗空等级估算。
-3. NASA Black Marble：作为后续增强或交叉校验。
+已接入数据：NOAA/EOG VIIRS Nighttime Lights VNL 2023。
 
 处理流程：
 
@@ -49,15 +45,19 @@ cell_selection=land
 下载 GeoTIFF
   -> 校验 CRS、分辨率、nodata
   -> 按目标区域裁剪
-  -> 生成点查询索引
-  -> 可选生成 COG 或 PMTiles 图层
+  -> 生成点查询索引（PMTiles）
   -> 保存 source、year、resolution、license 元数据
 ```
+
+相关命令：
+
+- `npm run preprocess:viirs` — 预处理 VIIRS GeoTIFF，生成点查询索引。
+- `npm run generate-pmtiles` — 生成 PMTiles 矢量瓦片，用于地图叠加。
 
 强制规则：
 
 - VIIRS 代表夜间灯光辐亮度，不等于实际天空亮度。
-- 只有 VIIRS 时，UI 显示“光污染指数”或“辐亮度”，不要显示为实测 Bortle。
+- 只有 VIIRS 时，UI 显示"光污染指数"或"辐亮度"，不要显示为实测 Bortle。
 - Bortle 只能标记为 `estimate`。
 - 光污染数据必须显示来源年份和可信度。
 

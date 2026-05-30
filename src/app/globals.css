@@ -214,6 +214,96 @@ input::placeholder, textarea::placeholder {
   }
 }
 
+/* ── Light pollution popup ────────────────────────────────────── */
+
+.lp-popup {
+  font-family: var(--font-sans);
+  padding: 4px 0;
+}
+
+.lp-popup-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-ink);
+  padding: 0 0 8px 0;
+  border-bottom: 1px solid var(--color-hairline);
+  margin-bottom: 8px;
+}
+
+.lp-popup-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  padding: 3px 0;
+}
+
+.lp-popup-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-ink-subtle);
+  white-space: nowrap;
+}
+
+.lp-popup-value {
+  font-size: 12px;
+  font-family: var(--font-mono);
+  font-weight: 500;
+  color: var(--color-ink);
+  text-align: right;
+}
+
+.lp-popup-disclaimer {
+  font-size: 10px;
+  color: var(--color-warning);
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-hairline);
+}
+
+.lp-popup-empty {
+  font-size: 12px;
+  color: var(--color-ink-subtle);
+  text-align: center;
+  padding: 4px 0;
+}
+
+.maplibregl-popup-content {
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-hairline-strong);
+  border-radius: 10px;
+  padding: 12px 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+}
+
+.maplibregl-popup-anchor-bottom .maplibregl-popup-tip {
+  border-top-color: var(--color-surface-2);
+}
+
+.maplibregl-popup-anchor-top .maplibregl-popup-tip {
+  border-bottom-color: var(--color-surface-2);
+}
+
+.maplibregl-popup-anchor-left .maplibregl-popup-tip {
+  border-right-color: var(--color-surface-2);
+}
+
+.maplibregl-popup-anchor-right .maplibregl-popup-tip {
+  border-left-color: var(--color-surface-2);
+}
+
+.maplibregl-popup-close-button {
+  color: var(--color-ink-subtle);
+  font-size: 16px;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.maplibregl-popup-close-button:hover {
+  color: var(--color-ink);
+  background: none;
+}
+
 /* ── Reduced-motion safety net ─────────────────────────────────── */
 /* Catches any CSS animations/transitions not already guarded by JS useReducedMotion() hooks */
 

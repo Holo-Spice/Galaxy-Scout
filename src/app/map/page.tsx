@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { LocationMarker } from "@/components/map/MapMarker";
-import { LayerToggle, type Layer } from "@/components/map/LayerToggle";
+import { useEffect, useState, useRef, useCallback } from "react";
+import maplibregl from "maplibre-gl";
+import "maplibre-gl/dist/maplibre-gl.css";
 import { LocationPanel } from "@/components/map/LocationPanel";
+import { LightPollutionLayer } from "@/components/map/LightPollutionLayer";
+import { LightPollutionControls } from "@/components/map/LightPollutionControls";
 
 interface ApiLocation {
   id: string;
@@ -13,99 +15,147 @@ interface ApiLocation {
   personal_rating: number | null;
 }
 
-interface MapMarker {
+interface MapLocation {
   id: string;
   name: string;
-  x: number;
-  y: number;
-  type: "location";
-  score: number;
-  bortle: number;
+  latitude: number;
+  longitude: number;
 }
-
-function toMapMarker(loc: ApiLocation): MapMarker {
-  const lat = loc.latitude;
-  const lng = loc.longitude;
-  const x = Math.max(5, Math.min(95, ((lng - 73) / (135 - 73)) * 100));
-  const y = Math.max(5, Math.min(95, ((50 - lat) / (50 - 30)) * 100));
-  return {
-    id: loc.id,
-    name: loc.name,
-    x,
-    y,
-    type: "location",
-    score: loc.personal_rating ?? 0,
-    bortle: 0,
-  };
-}
-
-const INITIAL_LAYERS: Layer[] = [
-  { id: "viirs", label: "VIIRS 辐亮度", active: true },
-  { id: "clouds", label: "云量预报", active: false },
-  { id: "roads", label: "路网", active: false },
-];
 
 export default function MapPage() {
-  const [markers, setMarkers] = useState<MapMarker[]>([]);
+  const mapContainer = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<maplibregl.Map | null>(null);
+  const markersRef = useRef<maplibregl.Marker[]>([]);
+  const [locations, setLocations] = useState<MapLocation[]>([]);
   const [loading, setLoading] = useState(true);
   const [showDetail, setShowDetail] = useState(true);
-  const [layers, setLayers] = useState(INITIAL_LAYERS);
-  const [showLayerPanel, setShowLayerPanel] = useState(false);
+  const [lpVisible, setLpVisible] = useState(false);
+  const [lpOpacity, setLpOpacity] = useState(0.7);
+  const [mapReady, setMapReady] = useState(false);
 
+  const toggleLpVisibility = useCallback(() => {
+    setLpVisible((prev) => !prev);
+  }, []);
+
+  const handleLpOpacityChange = useCallback((opacity: number) => {
+    setLpOpacity(opacity);
+  }, []);
+
+  // Init MapLibre
+  useEffect(() => {
+    if (!mapContainer.current || mapRef.current) return;
+
+    const map = new maplibregl.Map({
+      container: mapContainer.current,
+      style: {
+        version: 8,
+        sources: {
+          "osm-tiles": {
+            type: "raster",
+            tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+            tileSize: 256,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+          },
+        },
+        layers: [
+          {
+            id: "osm-tiles-layer",
+            type: "raster",
+            source: "osm-tiles",
+            minzoom: 0,
+            maxzoom: 19,
+          },
+        ],
+      },
+      center: [106, 36],
+      zoom: 5,
+      attributionControl: true,
+    });
+
+    map.on("load", () => {
+      setMapReady(true);
+    });
+
+    mapRef.current = map;
+
+    return () => {
+      map.remove();
+      mapRef.current = null;
+    };
+  }, []);
+
+  // Fetch locations
   useEffect(() => {
     fetch("/api/locations")
       .then((res) => res.json())
       .then((json) => {
         if (json.error) return;
-        setMarkers((json.data as ApiLocation[]).map(toMapMarker));
+        const locs = (json.data as ApiLocation[]).map((l) => ({
+          id: l.id,
+          name: l.name,
+          latitude: l.latitude,
+          longitude: l.longitude,
+        }));
+        setLocations(locs);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
-  const toggleLayer = (id: string) => {
-    setLayers((prev) =>
-      prev.map((l) => (l.id === id ? { ...l, active: !l.active } : l))
-    );
-  };
+  // Add/update markers when locations or map changes
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map || !mapReady) return;
+
+    // Clear old markers
+    markersRef.current.forEach((m) => m.remove());
+    markersRef.current = [];
+
+    // Add new markers
+    locations.forEach((loc) => {
+      const el = document.createElement("div");
+      el.className = "map-marker";
+      el.innerHTML = `<div style="
+        width:12px;height:12px;background:#6366f1;border:2px solid white;
+        border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,0.3);cursor:pointer;
+      " title="${loc.name}"></div>`;
+      el.addEventListener("click", () => {
+        new maplibregl.Popup({ offset: 14 })
+          .setLngLat([loc.longitude, loc.latitude])
+          .setHTML(`<strong>${loc.name}</strong><br/>${loc.latitude.toFixed(2)}°, ${loc.longitude.toFixed(2)}°`)
+          .addTo(map);
+      });
+
+      const marker = new maplibregl.Marker({ element: el })
+        .setLngLat([loc.longitude, loc.latitude])
+        .addTo(map);
+      markersRef.current.push(marker);
+    });
+
+    // Fit bounds if locations exist
+    if (locations.length > 0) {
+      const bounds = new maplibregl.LngLatBounds();
+      locations.forEach((l) => bounds.extend([l.longitude, l.latitude]));
+      map.fitBounds(bounds, { padding: 60, maxZoom: 10 });
+    }
+  }, [locations, mapReady]);
+
+  const selectedLocation = locations[0] || null;
 
   return (
     <div className="-m-6 h-screen flex flex-col md:flex-row overflow-hidden">
+      {/* Map area */}
       <div className="relative flex-1 min-h-0 bg-canvas">
-        <div className="absolute inset-0 bg-canvas" />
-
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0">
-          <div className="flex flex-col items-center gap-2 opacity-30">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="text-ink-subtle">
-              <circle cx="12" cy="12" r="3" />
-              <path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
-            </svg>
-            <span className="text-[13px] text-ink-subtle font-mono">
-              MapLibre GL JS · 等待底图配置
-            </span>
-          </div>
-        </div>
-
         {loading && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
-            <span className="text-[13px] text-ink-subtle">加载地点中...</span>
+          <div className="absolute inset-0 flex items-center justify-center z-20 pointer-events-none bg-canvas/50">
+            <span className="text-[13px] text-ink-subtle">加载地点中…</span>
           </div>
         )}
 
-        {markers.map((m) =>
-          m.type === "location" ? (
-            <LocationMarker
-              key={m.id}
-              name={m.name}
-              x={m.x}
-              y={m.y}
-              score={m.score}
-              bortle={m.bortle}
-            />
-          ) : null
-        )}
+        <div ref={mapContainer} className="absolute inset-0" />
 
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 w-[min(480px,calc(100%-2rem))]">
+        {/* Search */}
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10 w-[min(480px,calc(100%-2rem))]">
           <div className="relative">
             <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-subtle pointer-events-none">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
@@ -115,40 +165,68 @@ export default function MapPage() {
             </div>
             <input
               type="text"
-              placeholder="搜索观测地点..."
+              placeholder="搜索观测地点…"
               className="w-full bg-surface-1/95 backdrop-blur-sm border border-hairline rounded pl-10 pr-4 py-2.5 text-[14px] text-ink placeholder:text-ink-tertiary focus:border-accent focus:ring-1 focus:ring-accent-muted outline-none transition-all duration-150"
             />
           </div>
         </div>
 
-        <LayerToggle
-          layers={layers}
-          showLayerPanel={showLayerPanel}
-          onToggleLayer={toggleLayer}
-          onTogglePanel={() => setShowLayerPanel(!showLayerPanel)}
+        {/* Light pollution controls */}
+        <LightPollutionControls
+          visible={lpVisible}
+          opacity={lpOpacity}
+          onToggleVisibility={toggleLpVisibility}
+          onOpacityChange={handleLpOpacityChange}
         />
 
-        <div className="absolute bottom-4 right-4 z-20">
-          <div className="bg-surface-1/95 backdrop-blur-sm border border-hairline rounded px-3 py-2 flex items-center gap-3">
-            <span className="text-[11px] text-ink-subtle font-mono">30.5°N 119.6°E</span>
-            <div className="w-px h-3 bg-hairline" />
-            <span className="text-[11px] text-ink-subtle font-mono">z10</span>
-          </div>
-        </div>
+        {/* Light pollution layer */}
+        {mapReady && mapRef.current && (
+          <LightPollutionLayer
+            map={mapRef.current}
+            visible={lpVisible}
+            opacity={lpOpacity}
+          />
+        )}
       </div>
 
-      {showDetail && <LocationPanel onClose={() => setShowDetail(false)} />}
+      {/* Sidebar */}
+      {showDetail && selectedLocation && (
+        <div className="w-full md:w-[380px] shrink-0 bg-surface-1 border-t md:border-t-0 md:border-l border-hairline overflow-y-auto">
+          <div className="sticky top-0 bg-surface-1 z-10 px-4 py-3 border-b border-hairline flex items-center justify-between">
+            <span className="text-[14px] font-medium text-ink">
+              观测地点 · {locations.length}
+            </span>
+            <button
+              onClick={() => setShowDetail(false)}
+              className="p-1 rounded hover:bg-surface-2 text-ink-subtle"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <path d="M4 4l8 8M12 4l-8 8" />
+              </svg>
+            </button>
+          </div>
+
+          {locations.map((loc) => (
+            <LocationPanel
+              key={loc.id}
+              id={loc.id}
+              name={loc.name}
+              latitude={loc.latitude}
+              longitude={loc.longitude}
+              elevation=""
+              tags={[]}
+              coverImage=""
+            />
+          ))}
+        </div>
+      )}
 
       {!showDetail && (
         <button
           onClick={() => setShowDetail(true)}
-          className="hidden md:flex absolute top-4 right-4 z-20 items-center gap-2 px-3 py-2 rounded bg-surface-1/95 backdrop-blur-sm border border-hairline text-ink-muted hover:text-ink hover:border-hairline-strong transition-colors duration-150"
+          className="absolute top-4 right-4 z-20 bg-surface-1 border border-hairline rounded px-3 py-2 text-[13px] text-ink-subtle hover:text-ink shadow-sm"
         >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-            <rect x="1" y="1" width="14" height="14" rx="2" />
-            <path d="M10 1v14" />
-          </svg>
-          <span className="text-[13px]">详情</span>
+          地点列表 · {locations.length}
         </button>
       )}
     </div>

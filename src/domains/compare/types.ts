@@ -27,6 +27,10 @@ export interface LightPollutionInfo {
   source: string;
   sourceYear: number;
   confidence: "high" | "medium" | "low" | "unknown";
+  /** VIIRS radiance in nW·cm⁻²·sr⁻¹, null if unavailable */
+  radiance: number | null;
+  /** Estimated Bortle class 1-9, always an estimate */
+  bortleEstimate: number | null;
 }
 
 export interface LocationSummary {
