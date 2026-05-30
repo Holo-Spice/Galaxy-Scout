@@ -10,11 +10,11 @@ interface LightPollutionControlsProps {
 }
 
 const LEGEND_ITEMS = [
-  { class: 1, color: "#00008B", label: "极暗" },
-  { class: 2, color: "#4169E1", label: "暗" },
-  { class: 3, color: "#FFA500", label: "中等" },
-  { class: 4, color: "#FF4500", label: "较亮" },
-  { class: 5, color: "#FF0000", label: "明亮" },
+  { class: 1, color: "#00008B", label: "极暗 (暗蓝)" },
+  { class: 2, color: "#0000CD", label: "暗 (蓝)" },
+  { class: 3, color: "#008000", label: "中等 (绿)" },
+  { class: 4, color: "#FF8C00", label: "较亮 (橙)" },
+  { class: 5, color: "#FF0000", label: "明亮 (红)" },
 ] as const;
 
 export function LightPollutionControls({

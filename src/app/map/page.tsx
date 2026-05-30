@@ -29,7 +29,27 @@ export default function MapPage() {
 
         map = new maplibregl.Map({
           container: mapContainer.current,
-          style: "https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json",
+          style: {
+          version: 8,
+          glyphs: "https://fonts.openmaptiles.org/{fontstack}/{range}.pbf",
+          sources: {
+            "osm-raster": {
+              type: "raster",
+              tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+              tileSize: 256,
+              attribution: '&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>',
+            },
+          },
+          layers: [
+            {
+              id: "osm-raster-layer",
+              type: "raster",
+              source: "osm-raster",
+              minzoom: 0,
+              maxzoom: 19,
+            },
+          ],
+        },
           center: [106, 36],
           zoom: 5,
         });

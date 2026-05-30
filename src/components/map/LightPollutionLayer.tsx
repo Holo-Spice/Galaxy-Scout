@@ -23,20 +23,17 @@ function row(label: string, value: string): string {
     </div>`;
 }
 
-const COLOR_EXPRESSION = [
-  "match",
-  ["get", "darkness_class"],
-  1,
-  "#00008B",
-  2,
-  "#4169E1",
-  3,
-  "#FFA500",
-  4,
-  "#FF4500",
-  5,
-  "#FF0000",
-  "#888888",
+// Heatmap color ramp: transparent → dark blue → green → yellow → red → white
+const HEATMAP_COLORS = [
+  "interpolate", ["linear"], ["heatmap-density"],
+  0, "rgba(0, 0, 0, 0)",
+  0.1, "#00008B",
+  0.25, "#0000CD",
+  0.4, "#008000",
+  0.55, "#FFFF00",
+  0.7, "#FF8C00",
+  0.85, "#FF0000",
+  1, "#FFFFFF",
 ] as const;
 
 export function LightPollutionLayer({
@@ -64,25 +61,32 @@ export function LightPollutionLayer({
       map.addLayer(
         {
           id: LAYER_ID,
-          type: "circle",
+          type: "heatmap",
           source: SOURCE_ID,
           paint: {
-            "circle-color": COLOR_EXPRESSION as never,
-            "circle-radius": [
-              "interpolate",
-              ["linear"],
-              ["zoom"],
-              0,
-              2,
-              5,
-              4,
-              10,
-              8,
-              15,
-              12,
+            "heatmap-weight": [
+              "interpolate", ["linear"],
+              ["get", "viirs_radiance"],
+              0, 0.1,
+              0.5, 0.3,
+              2, 0.6,
+              5, 0.8,
+              10, 1,
             ],
-            "circle-opacity": opacity,
-            "circle-stroke-width": 0,
+            "heatmap-intensity": [
+              "interpolate", ["linear"], ["zoom"],
+              0, 1,
+              9, 3,
+            ],
+            "heatmap-color": HEATMAP_COLORS as never,
+            "heatmap-radius": [
+              "interpolate", ["linear"], ["zoom"],
+              0, 8,
+              5, 20,
+              10, 40,
+              15, 80,
+            ],
+            "heatmap-opacity": opacity,
           },
         },
         firstSymbolId,
@@ -110,7 +114,7 @@ export function LightPollutionLayer({
   useEffect(() => {
     if (!addedRef.current) return;
     if (!map.getLayer(LAYER_ID)) return;
-    map.setPaintProperty(LAYER_ID, "circle-opacity", opacity);
+    map.setPaintProperty(LAYER_ID, "heatmap-opacity", opacity);
   }, [map, opacity]);
 
   useEffect(() => {
