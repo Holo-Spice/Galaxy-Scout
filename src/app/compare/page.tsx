@@ -84,6 +84,7 @@ export default function ComparePage() {
 
         return getCompare({
           locationIds: allLocations.map((l) => l.id),
+          origin: { latitude: 30.2741, longitude: 120.1551, name: "杭州" },
           dateLocal,
           startHourLocal: 20,
           endHourLocal: 2,
