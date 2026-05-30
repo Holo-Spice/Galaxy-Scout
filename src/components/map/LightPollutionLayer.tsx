@@ -12,7 +12,8 @@ interface LightPollutionLayerProps {
 
 const SOURCE_ID = "light-pollution";
 const LAYER_ID = "light-pollution-layer";
-const GEOJSON_URL = "/tiles/light-pollution.geojson";
+// Full 695K dataset: /tiles/light-pollution.geojson (107 MB)
+const GEOJSON_URL = "/tiles/light-pollution-lite.geojson";
 
 function row(label: string, value: string): string {
   return `

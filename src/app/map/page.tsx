@@ -3,7 +3,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
-import { LocationPanel } from "@/components/map/LocationPanel";
 import { LightPollutionLayer } from "@/components/map/LightPollutionLayer";
 import { LightPollutionControls } from "@/components/map/LightPollutionControls";
 
@@ -140,7 +139,6 @@ export default function MapPage() {
     }
   }, [locations, mapReady]);
 
-  const selectedLocation = locations[0] || null;
 
   return (
     <div className="-m-6 h-screen flex flex-col md:flex-row overflow-hidden">
@@ -190,7 +188,7 @@ export default function MapPage() {
       </div>
 
       {/* Sidebar */}
-      {showDetail && selectedLocation && (
+      {showDetail && (
         <div className="w-full md:w-[380px] shrink-0 bg-surface-1 border-t md:border-t-0 md:border-l border-hairline overflow-y-auto">
           <div className="sticky top-0 bg-surface-1 z-10 px-4 py-3 border-b border-hairline flex items-center justify-between">
             <span className="text-[14px] font-medium text-ink">
@@ -207,16 +205,22 @@ export default function MapPage() {
           </div>
 
           {locations.map((loc) => (
-            <LocationPanel
+            <div
               key={loc.id}
-              id={loc.id}
-              name={loc.name}
-              latitude={loc.latitude}
-              longitude={loc.longitude}
-              elevation=""
-              tags={[]}
-              coverImage=""
-            />
+              className="px-4 py-3 border-b border-hairline hover:bg-surface-2 cursor-pointer transition-colors"
+              onClick={() => {
+                mapRef.current?.flyTo({
+                  center: [loc.longitude, loc.latitude],
+                  zoom: 12,
+                  duration: 1000,
+                });
+              }}
+            >
+              <div className="text-[14px] font-medium text-ink">{loc.name}</div>
+              <div className="text-[12px] text-ink-subtle mt-0.5 font-mono">
+                {loc.latitude.toFixed(4)}°, {loc.longitude.toFixed(4)}°
+              </div>
+            </div>
           ))}
         </div>
       )}
